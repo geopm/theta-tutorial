@@ -1,0 +1,57 @@
+#!/bin/bash
+#COBALT -t 30
+#COBALT -n 2
+#COBALT -A Intel
+#COBALT -O geopm_tutorial_4.$jobid
+#COBALT -q debug-cache-quad
+#COBALT --jobname geopm_tutorial_4
+#COBALT --env JOBID=$jobid
+
+# Ignore warnings about using standard OMP variables
+export KMP_WARNINGS=FALSE
+
+module load geopm
+
+# Run on 2 nodes
+# with 8 MPI ranks
+# launch geopm controller as an MPI process
+# create a report file
+# create trace files
+
+if [ ! $IMBALANCER_CONFIG ]; then
+    export IMBALANCER_CONFIG=tutorial_4_imbalance.conf
+fi
+# Create configuration file for Imbalancer if it doesn't exist.
+if [ ! -e $IMBALANCER_CONFIG ]; then
+    one_host=$(aprun -n 1 -N 1 hostname | head -n1)
+    echo $one_host 0.1 > $IMBALANCER_CONFIG
+fi
+
+
+# create policy files
+geopmagent --agent=power_governor \
+           --policy=150 > tutorial_governed_policy.json
+
+geopmagent --agent=power_balancer \
+           --policy=150,0,0,0 > tutorial_balanced_policy.json
+
+
+
+# Use GEOPM launcher wrapper script with ALPS's aprun
+geopmaprun -N 4 \
+           -n 8 \
+           --geopm-ctl=process \
+           --geopm-report=tutorial_4_governed_report \
+           --geopm-trace=tutorial_4_governed_trace \
+           --geopm-agent=power_governor \
+           --geopm-policy=tutorial_governed_policy.json \
+           -- ./tutorial_4 \
+&& \
+geopmaprun -N 4 \
+           -n 8 \
+           --geopm-ctl=process \
+           --geopm-report=tutorial_4_balanced_report \
+           --geopm-trace=tutorial_4_balanced_trace \
+           --geopm-agent=power_balancer \
+           --geopm-policy=tutorial_balanced_policy.json \
+           -- ./tutorial_4

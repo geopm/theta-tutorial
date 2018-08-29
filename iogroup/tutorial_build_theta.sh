@@ -30,14 +30,20 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-source ../tutorial_env.sh
+module load geopm
 
 # OMP_FLAGS: Flags for enabling OpenMP
 if [ ! "$OMP_FLAGS" ]; then
-    OMP_FLAGS="-fopenmp"
+    OMP_FLAGS="-qopenmp"
 fi
 
+GEOPM_CFLAGS="-dynamic -I$GEOPM_INC -mkl"
+GEOPM_LDFLAGS="-dynamic -L$GEOPM_LIB -lgeopm -lstdc++ -L/usr/lib64 -lhwloc -mkl"
+
+
 make \
-CFLAGS="$GEOPM_CFLAGS $OMP_FLAGS -std=gnu11 -mavx $CFLAGS" \
-CXXFLAGS="$GEOPM_CFLAGS $OMP_FLAGS -std=gnu++11 -mavx $CXXFLAGS" \
-LDFLAGS="$OMP_FLAGS -lm -lrt -mavx $LDFLAGS"
+CC=cc CXX=CC MPICC=cc MPICXX=CC \
+CFLAGS="$GEOPM_CFLAGS $OMP_FLAGS -DTUTORIAL_ENABLE_MKL -D_GNU_SOURCE -std=c99  $CFLAGS" \
+CXXFLAGS="$GEOPM_CFLAGS $OMP_FLAGS -DTUTORIAL_ENABLE_MKL -D_GNU_SOURCE -std=c++11 -I$GEOPM_INC $CXXFLAGS" \
+LDFLAGS="$GEOPM_LDFLAGS $OMP_FLAGS -lm -lrt $LDFLAGS"
+

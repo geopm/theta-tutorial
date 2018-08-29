@@ -1,14 +1,14 @@
 GEOPM TUTORIAL
 ==============
+
 This directory contains a step by step tutorial on how to use the
 GEOPM package.  Each step has an associated source and script file.
 The script file will run the associated program and demonstrate a
-GEOPM feature.  There is a script called "tutorial_env.sh" which is
-sourced by all other tutorial scripts, and defines variables which
-describe the install location of GEOPM.  The environment script may
-have to be modified to describe the installed locations on your
-system.  Each step in the tutorial is documented below in this README.
-The tutorial is a work in progress.
+GEOPM feature.  This tutorial has been modified from the standard
+GEOPM tutorial to be specific to the ALCF's Theta system.  It makes
+use of the geopm module that is installed there.  Each step in the
+tutorial is documented below in this README.  The tutorial is a work
+in progress.
 
 A video demonstration of these tutorials is available online here:
 
@@ -23,49 +23,26 @@ updated to use the launcher, but the videos have not.
 Building the tutorials
 ----------------------
 A simple Makefile which is not part of the GEOPM autotools build
-system compiles the tutorial code.  There are two build scripts, one
-which compiles with the GNU toolchain: "tutorial_build_gnu.sh", and
-one which compiles with the Intel toolchain:
-"tutorial_build_intel.sh".  The build scripts use the GEOPM install
-location defined in "tutorial_env.sh".  If "mpicc" is not in the
-user's PATH, the environment variable "MPICC" must be set to the path
-of the to the user's MPI C compiler wrapper.
+system compiles the tutorial code.  There is a build script that will
+compile the tutorials with the make file using the Theta environment
+called tutorial_build_theta.sh.
 
 
-0. Profiling and Tracing an Unmodified Application
---------------------------------------------------
+Step 0: Profiling and Tracing an Unmodified Application
+-------------------------------------------------------
 The first thing an HPC application user will want to do when
 integrating their application with the GEOPM runtime is to analyze
 performance of the application without modifying its source code.
-This can be enabled by using the GEOPM launcher script or by setting a
-few environment variables before launching the application.  The
-tutorial_0.sh shows three different methods for launching the GEOPM
-runtime.  The first method uses the geopmsrun wrapper script for the
-SLURM srun job launcher:
+This is shown in the COBALT script called tutorial_0.cobalt.  This
+script can be submitted directly to the COBALT queue, but the charging
+allocation may need to be changed (it is set to Intel by default).
 
-    geopmsrun  -N 2 -n 8 --geopm-preload --geopm-ctl=process \
-        --geopm-report=tutorial_0_report --geopm-trace=tutorial_0_trace \
-        -- ./tutorial_0
-
-The second method uses the geopmaprun wrapper script for the ALPS
+The cobalt sript uses the geopmaprun wrapper script for the ALPS
 aprun job launcher:
 
     geopmaprun -N 4 -n 8 --geopm-preload --geopm-ctl=process \
         --geopm-report=tutorial_0_report --geopm-trace=tutorial_0_trace \
         -- ./tutorial_0
-
-If your system does not support srun or aprun launch, the third option
-is to set a few environment variables for GEOPM as follows:
-
-    LD_PRELOAD=$GEOPM_LIBDIR/libgeopm.so
-    LD_DYNAMIC_WEAK=true
-    GEOPM_PMPI_CTL=process
-    GEOPM_REPORT=tutorial_0_report
-    GEOPM_TRACE=tutorial_0_trace
-
-The environment variable MPIEXEC must also be set to a command and
-options that will launch a job on your system using two compute nodes
-and ten MPI ranks (e.g. MPIEXEC='srun -N 2 -n 10').
 
 The LD_PRELOAD environment variable enables the GEOPM library to
 interpose on MPI using the PMPI interface.  Linking directly to
@@ -100,8 +77,8 @@ The report file will contain information about time and energy spent
 in MPI regions and outside of MPI regions as well as the average CPU
 frequency.
 
-1. A slightly more realistic application
-----------------------------------------
+Step 1: A slightly more realistic application
+---------------------------------------------
 Tutorial 1 shows a slightly more realistic application.  This
 application implements a loop that does a number of different types of
 operations.  In addition to sleeping, the loop does a memory intensive
@@ -111,14 +88,14 @@ operation.  In this example we are again using GEOPM without including
 any GEOPM APIs in the application and using LD_PRELOAD to interpose
 GEOPM on MPI.
 
-2. Adding GEOPM mark up to the application
-------------------------------------------
+Step 2: Adding GEOPM mark up to the application
+-----------------------------------------------
 Tutorial 2 takes the application used in tutorial 1 and modifies it
 with the GEOPM profiling markup.  This enables the report and trace to
 contain region specific information.
 
-3. Adding work imbalance to the application
--------------------------------------------
+Step 3: Adding work imbalance to the application
+------------------------------------------------
 Tutorial 3 modifies tutorial 2 removing all but the compute intensive
 region from the application and then adding work imbalance across the
 MPI ranks.  This tutorial also uses a modified implementation of the
@@ -141,8 +118,8 @@ balancing decider at the tree levels of the hierarchy and the
 governing decider at the leaf.
 
 
-4. Adding artificial imbalance to the application
--------------------------------------------------
+Step 4: Adding artificial imbalance to the application
+------------------------------------------------------
 Tutorial 4 enables artificial injection of imbalance.  This differs
 from from tutorial by 3 having the application sleep for a period of
 time proportional to the amount of work done rather than simply
@@ -164,8 +141,8 @@ tutorial_4.sh script will create a configuration file called
 nodes will have a 10% injection of imbalance.  The node is chosen
 arbitrarily by a race if the configuration file is not present.
 
-5. Using the progress interface
--------------------------------
+Step 5: Using the progress interface
+------------------------------------
 A computational application may make use of the geopm_prof_progress()
 or the geopm_tprof_post() interfaces to report fractional progress
 through a region to the controller.  These interfaces are documented
@@ -176,8 +153,8 @@ time.  Note that the unmodified tutorial build scripts do enable
 OpenMP, so the geopm_tprof* interfaces will be used by default.  The
 progress values recorded can be seen in the trace output.
 
-6. The model application
-------------------------
+Step 6: The model application
+-----------------------------
 Tutorial 6 is the first tutorial written in C++.  The regions defined
 in the previous examples (with the exception of the sleep region) have
 non-trivial amounts of time dedicated to start-up and shutdown

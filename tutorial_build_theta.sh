@@ -1,4 +1,3 @@
-#!/bin/bash
 #
 #  Copyright (c) 2015, 2016, 2017, 2018, Intel Corporation
 #
@@ -31,51 +30,17 @@
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-set err=0
-source tutorial_env.sh
-
-export PATH=$GEOPM_BINDIR:$PATH
-export PYTHONPATH=$GEOPMPY_PKGDIR:$PYTHONPATH
-export LD_LIBRARY_PATH=$GEOPM_LIBDIR:$LD_LIBRARY_PATH
-
-# Run on 2 nodes
-# with 8 MPI ranks
-# launch geopm controller as an MPI process
-# create a report file
-# create trace files
-if [ "$GEOPM_RM" == "SLURM" ]; then
-    # Use GEOPM launcher wrapper script with SLURM's srun
-    geopmsrun  -N 2 \
-               -n 8 \
-               --geopm-ctl=process \
-               --geopm-report=tutorial_6_report \
-               --geopm-trace=tutorial_6_trace \
-               -- ./tutorial_6 tutorial_6_config.json
-    err=$?
-elif [ "$GEOPM_RM" == "ALPS" ]; then
-    # Use GEOPM launcher wrapper script with ALPS's aprun
-    geopmaprun -N 4 \
-               -n 8 \
-               --geopm-ctl=process \
-               --geopm-report=tutorial_6_report \
-               --geopm-trace=tutorial_6_trace \
-               -- ./tutorial_6 tutorial_6_config.json
-    err=$?
-elif [ $MPIEXEC ]; then
-    # Use MPIEXEC and set GEOPM environment variables to launch the job
-    LD_DYNAMIC_WEAK=true \
-    GEOPM_PMPI_CTL=process \
-    GEOPM_REPORT=tutorial_6_report \
-    GEOPM_TRACE=tutorial_6_trace \
-    $MPIEXEC \
-    ./tutorial_6 tutorial_6_config.json
-    err=$?
-else
-    echo "Error: tutorial_2.sh: set GEOPM_RM to 'SLURM' or 'ALPS'." 2>&1
-    echo "       If SLURM or ALPS are not available, set MPIEXEC to" 2>&1
-    echo "       a command that will launch an MPI job on your system" 2>&1
-    echo "       using 2 nodes and 10 processes." 2>&1
-    err=1
+module load geopm
+# OMP_FLAGS: Flags for enabling OpenMP
+if [ ! "$OMP_FLAGS" ]; then
+    OMP_FLAGS="-qopenmp"
 fi
 
-exit $err
+GEOPM_CFLAGS="-dynamic -I$GEOPM_INC -mkl"
+GEOPM_LDFLAGS="-dynamic -L$GEOPM_LIB -lgeopm -lstdc++ -L/usr/lib64 -lhwloc -mkl"
+
+make \
+CC=cc CXX=CC MPICC=cc MPICXX=CC \
+CFLAGS="$GEOPM_CFLAGS $OMP_FLAGS -DTUTORIAL_ENABLE_MKL -D_GNU_SOURCE -std=c99  $CFLAGS" \
+CXXFLAGS="$GEOPM_CFLAGS $OMP_FLAGS -DTUTORIAL_ENABLE_MKL -D_GNU_SOURCE -std=c++11 -I$GEOPM_INC $CXXFLAGS" \
+LDFLAGS="$GEOPM_LDFLAGS $OMP_FLAGS -lm -lrt $LDFLAGS"
