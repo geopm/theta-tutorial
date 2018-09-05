@@ -37,7 +37,7 @@ This is shown in the COBALT script called tutorial_0.cobalt.  This
 script can be submitted directly to the COBALT queue, but the charging
 allocation may need to be changed (it is set to Intel by default).
 
-The cobalt sript uses the geopmaprun wrapper script for the ALPS
+The COBALT script uses the geopmaprun wrapper script for the ALPS
 aprun job launcher:
 
     geopmaprun -N 4 -n 8 --geopm-preload --geopm-ctl=process \
