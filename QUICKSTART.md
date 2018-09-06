@@ -109,18 +109,23 @@ an application.
         }
     }
 
-In addition there are other APIs (geopm_prof_progress() and
-geopm_tprof_*()) that can be used to provide application feedback to
-the GEOPM Agent algorithm.  Although extension of the GEOPM features
-through an Agent plugin would enable a user to write an Agent that
-responds to progress and thread API's, the GEOPM runtime does not
-provide any built-in Agents that use the feedback provided by these
-interfaces.  For this reason modification of the application to use
-these interfaces will provide no benefit with built-in Agents.  As a
-first integration with GEOPM simply adding the geopm_prof_epoch(),
-geopm_prof_region(), geopm_prof_enter(), and geopm_prof_exit() calls
-to the application should enable all of the benefits provided by the
-built-in GEOPM Agents.
+As a first integration with GEOPM simply adding calls to:
+
+    geopm_prof_epoch()
+    geopm_prof_region()
+    geopm_prof_enter()
+    geopm_prof_exit()
+
+in your application should enable all of the benefits provided by the
+built-in GEOPM Agents.  In addition there are other APIs documented in
+geopm_proc_c(3) (geopm_prof_progress() and geopm_tprof_*()) that can
+be used to provide application feedback to the GEOPM Agent algorithm.
+The GEOPM runtime does not provide any built-in Agents that use the
+feedback provided by these progress and thread API's.  For this reason
+modification of the application to use these additional interfaces
+will provide no benefit with built-in Agents.  Extension of the GEOPM
+features through an Agent plugin would enable a user to write an Agent
+that uses this feedback, but this is beyond the scope of this guide.
 
 Step 2: Selecting an Agent
 --------------------------
