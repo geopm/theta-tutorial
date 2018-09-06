@@ -1,6 +1,5 @@
 GEOPM QUICK START
 =================
-
 This document is designed to assist users of the ALCF Theta system
 to quickly integrate their application with the GEOPM runtime.  The
 GEOPM software is available on Theta via the lmod module system and
@@ -29,30 +28,35 @@ Step 0: Profiling and Tracing an Unmodified Application
 -------------------------------------------------------
 The first thing an HPC application user will want to do when
 integrating their application with the GEOPM runtime is to analyze
-performance of the application without modifying its source code.
-This can be accomplished by using the geopmaprun wrapper script for
-the ALPS aprun job launcher:
+performance of the application without recompiling the application or
+modifying its source code.  This can be accomplished by using the
+geopmaprun wrapper script for the ALPS aprun job launcher while
+specifying the --geopm-preload option:
 
     geopmagent -a monitor -p None > monitor_policy.json
 
-    geopmaprun -N 4 -n 8 --geopm-preload --geopm-ctl=process \
+    geopmaprun -N NUM_RANK_PER_NODE -n NUM_RANK \
+        --geopm-preload --geopm-ctl=process \
         --geopm-agent=monitor --geopm-policy=monitor_policy.json \
         --geopm-report=report.txt --geopm-trace=trace.csv \
         -- APPLICATION APP_OPTIONS
 
-here APPLICATION is a place holder for the path to the application of
+Here APPLICATION is a place holder for the path to the application of
 choice, and APP_OPTIONS is a place holder for the command line options
-for the application. The --geopm-preload command line option enables
-the GEOPM library to interpose on MPI using the PMPI interface.
-Linking directly to libgeopm has the same effect, but this method
-allows GEOPM to be integrated with unmodified binaries.
+for the application.  The --geopm-preload command line option enables
+the GEOPM library to interpose on MPI using the PMPI interface though
+the LD_PRELOAD mechanism.  Linking directly to libgeopm has the same
+effect, but preloading GEOPM enables integratation with unmodified
+binaries.
 
 The above example uses the command line option to the launcher
 "--geopm-ctl=process" which launches the controller as an extra MPI
 process per node.  Note that the geopmaprun command will print to
 standard output the interpreted command that was executed and that
-this output will show an extra rank per node requested.  The summary
-report will be created in the file named:
+this output will show an extra rank per node requested.
+
+The primary reason for using the monitor Agent is to create report and
+trace files.  The summary report will be created in the file named:
 
     report.txt
 
@@ -66,7 +70,7 @@ The report file will contain information about time and energy spent
 in MPI regions and outside of MPI regions as well as the average CPU
 frequency.
 
-Step 1: Adding GEOPM mark up to the application
+Step 1: Adding GEOPM Mark-up to the Application
 -----------------------------------------------
 To take full advantage of GEOPM a user must add GEOPM function calls
 to the application from the set documented by the geopm_prof_c(3) man
@@ -74,9 +78,10 @@ page.
 
     man geopm_prof_c
 
-To have a more fine grained report, adding the geopm_prof_enter() and
-geopm_prof_exit() functions around regions of code will enable GEOPM
-to report statistics gathered within that region of code.
+To have a more fine grained information in the report, add the
+geopm_prof_enter() and geopm_prof_exit() functions around regions of
+code.  This will enable GEOPM to extend the report with statistics
+gathered specifically while that region of code was executing.
 
     static uint64_t function1_rid = 0;
     if (function1_rid == 0) {
@@ -93,8 +98,8 @@ agent can use this mark up to choose efficient processor frequencies
 for each region.  To enable effective application of the
 "power_balancer" agent, the outer loop of the application must be
 identified with the geopm_prof_epoch() call.  One call to this
-function should be placed at the beginning of the outer-most loop
-of an application.
+function should be placed at the beginning of the outer-most loop of
+an application.
 
     int main(int argc, char **argv)
     {
@@ -123,10 +128,10 @@ The first example provided in "Step 0" uses the monitor agent:
 
     man geopm_agent_monitor
 
-This agent does not modify any hardware parameters, but simply takes
+This agent does not modify any hardware settings, but simply takes
 samples throughout the runtime and uses them to generate report and
-trace files.  There are three other agents that can be selected and each
-of these is documented in a man page:
+trace files.  There are three other agents that can be selected and
+each of these is documented in a man page:
 
     man geopm_agent_power_governor
     man geopm_agent_power_balancer
