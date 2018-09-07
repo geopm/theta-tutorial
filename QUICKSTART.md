@@ -10,12 +10,24 @@ can be loaded into the user's environment with the command:
 This will add the paths to the user's environment for access to the
 libraries, binaries, man pages and source code headers for the system
 installed version of GEOPM.  Links to all of the geopm man pages can
-be accessed by requesting the GEOPM overview man page:
+be accessed by requesting the GEOPM overview man page
+[geopm(7)](https://geopm.github.io/man/geopm.7.html):
 
     man geopm
 
-Step 0: Profiling and Tracing an Unmodified Application
--------------------------------------------------------
+The first GEOPM interfaces that are covered here are the
+[geopmagent(1)](https://geopm.github.io/man/geopmagent.1.html):
+
+    man geopmagent
+
+and the [geopmaprun(1)](https://geopm.github.io/man/geopmaprun.1.html):
+
+    man geopmaprun
+
+command line utilities.
+
+Profiling and Tracing an Unmodified Application
+-----------------------------------------------
 The first thing an HPC application user will want to do when
 integrating their application with the GEOPM runtime is to analyze
 performance of the application without recompiling the application or
@@ -60,13 +72,19 @@ The report file will contain information about time and energy spent
 in MPI regions and outside of MPI regions as well as the average CPU
 frequency.
 
-Step 1: Adding GEOPM Mark-up to the Application
------------------------------------------------
+Adding GEOPM Mark-up to the Application
+---------------------------------------
 To take full advantage of GEOPM a user must add GEOPM function calls
-to the application from the set documented by the geopm_prof_c(3) man
-page.
+to the application from the set documented by the man page
+[geopm_prof_c(3)](https://geopm.github.io/man/geopm_prof_c.3.html):
 
     man geopm_prof_c
+
+There are Fortran wrappers into these C functions and these are
+documented in the man page
+[geopm_fortran(3)](https://geopm.github.io/man/geopm_fortran.3.html):
+
+    man geopm_fortran
 
 To have a more fine grained information in the report, add the
 geopm_prof_enter() and geopm_prof_exit() functions around regions of
@@ -117,8 +135,8 @@ will provide no benefit with built-in Agents.  Extension of the GEOPM
 features through an Agent plugin would enable a user to write an Agent
 that uses this feedback, but this is beyond the scope of this guide.
 
-Step 2: Compiling Application Against GEOPM
--------------------------------------------
+Compiling Application Against GEOPM
+-----------------------------------
 When loading the geopm module several variables will be added to the
 shell environment.  The GEOPM_INC variable defines the path to the
 GEOPM header files.  When compiling source that includes a geopm
@@ -134,9 +152,9 @@ line:
 
 Note that dynamic linking is required with the -dynamic flag.
 
-Step 3: Selecting an Agent
---------------------------
-The first example provided in "Step 0" uses the monitor agent:
+Selecting an Agent
+------------------
+The first example provided uses the monitor agent:
 
     man geopm_agent_monitor
 
@@ -153,4 +171,9 @@ Please read through the features that these Agents implement, and try
 using them with your application.  The agent is selected with the
 --geopm-agent command line option for the geopmaprun(1) command and
 the json policy file for each agent can be generated with the
-geopmagent(1) command line tool.
+geopmagent(1) command line tool.  See links to the web version of each
+Agent man page:
+[geopm_agent_monitor(7)](https://geopm.github.io/man/geopm_agent_monitor.7.html),
+[geopm_agent_power_governor(7)](https://geopm.github.io/man/geopm_agent_power_governor.7.html),
+[geopm_agent_power_balancer(7)](https://geopm.github.io/man/geopm_agent_power_balancer.7.html),
+[geopm_agent_energy_efficient(7)](https://geopm.github.io/man/geopm_agent_energy_efficient.7.html)
