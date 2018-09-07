@@ -14,16 +14,6 @@ be accessed by requesting the GEOPM overview man page:
 
     man geopm
 
-Adding to your compile line
-
-    -I$GEOPM_INC
-
-is required for including the GEOPM headers and
-
-    -L$GEOPM_LIB -lgeopm -dynamic
-
-is required for linking to libgeopm which provides the GEOPM runtime.
-
 Step 0: Profiling and Tracing an Unmodified Application
 -------------------------------------------------------
 The first thing an HPC application user will want to do when
@@ -35,19 +25,19 @@ specifying the --geopm-preload option:
 
     geopmagent -a monitor -p None > monitor_policy.json
 
-    geopmaprun -N NUM_RANK_PER_NODE -n NUM_RANK \
+    geopmaprun -N NUM_RANK_PER_NODE -n NUM_RANK [OTHER_APRUN_OPTIONS] \
         --geopm-preload --geopm-ctl=process \
         --geopm-agent=monitor --geopm-policy=monitor_policy.json \
         --geopm-report=report.txt --geopm-trace=trace.csv \
         -- APPLICATION APP_OPTIONS
 
-Here APPLICATION is a place holder for the path to the application of
-choice, and APP_OPTIONS is a place holder for the command line options
-for the application.  The --geopm-preload command line option enables
-the GEOPM library to interpose on MPI using the PMPI interface though
-the LD_PRELOAD mechanism.  Linking directly to libgeopm has the same
-effect, but preloading GEOPM enables integratation with unmodified
-binaries.
+Here "APPLICATION" is a place holder for the path to the application
+of choice, and "APP_OPTIONS" is a place holder for the command line
+options for the application.  The --geopm-preload command line option
+enables the GEOPM library to interpose on MPI using the PMPI interface
+though the LD_PRELOAD mechanism.  Linking directly to libgeopm has the
+same effect, but preloading GEOPM enables integration with
+unmodified binaries.
 
 The above example uses the command line option to the launcher
 "--geopm-ctl=process" which launches the controller as an extra MPI
@@ -127,7 +117,24 @@ will provide no benefit with built-in Agents.  Extension of the GEOPM
 features through an Agent plugin would enable a user to write an Agent
 that uses this feedback, but this is beyond the scope of this guide.
 
-Step 2: Selecting an Agent
+Step 2: Compiling Application Against GEOPM
+-------------------------------------------
+When loading the geopm module several variables will be added to the
+shell environment.  The GEOPM_INC variable defines the path to the
+GEOPM header files.  When compiling source that includes a geopm
+header file you must add
+
+    -I$GEOPM_INC
+
+to your compile line.  To link your application against libgeopm the
+GEOPM_LIB variable defined by the module should be used on your link
+line:
+
+    -L$GEOPM_LIB -lgeopm -dynamic
+
+Note that dynamic linking is required with the -dynamic flag.
+
+Step 3: Selecting an Agent
 --------------------------
 The first example provided in "Step 0" uses the monitor agent:
 
@@ -144,6 +151,6 @@ each of these is documented in a man page:
 
 Please read through the features that these Agents implement, and try
 using them with your application.  The agent is selected with the
---geopm-agent command line option for the geopmaprun command and the
-json policy file for each agent can be generated with the
+--geopm-agent command line option for the geopmaprun(1) command and
+the json policy file for each agent can be generated with the
 geopmagent(1) command line tool.
