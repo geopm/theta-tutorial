@@ -177,3 +177,12 @@ Agent man page:
 [geopm_agent_power_governor(7)](https://geopm.github.io/man/geopm_agent_power_governor.7.html),
 [geopm_agent_power_balancer(7)](https://geopm.github.io/man/geopm_agent_power_balancer.7.html),
 [geopm_agent_energy_efficient(7)](https://geopm.github.io/man/geopm_agent_energy_efficient.7.html)
+
+The power_governor and power_balancer both impose a limit on the power
+used by the processor socket, and this limit is selected by the user.
+We are working on modifications to the power_balancer agent to enable
+it to provide some energy saving capabilities when the power limit is
+set to TDP (215 Watts on the Theta KNL SKUs) or higher, but this is a
+work in progress. On the KNL architecture (i.e. Theta) the
+energy_efficient Agent is not very effective at saving energy,
+although on Xeon architectures it can work quite well.
