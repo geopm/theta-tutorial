@@ -7,9 +7,6 @@
 #COBALT --jobname geopm_tutorial_4
 #COBALT --env JOBID=$jobid
 
-# Ignore warnings about using standard OMP variables
-export KMP_WARNINGS=FALSE
-
 module load geopm
 
 # Run on 2 nodes
