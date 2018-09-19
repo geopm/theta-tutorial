@@ -16,7 +16,7 @@ https://www.youtube.com/playlist?list=PLwm-z8c2AbIBU-T7HnMi_Pux7iO3gQQnz
 
 These videos do not reflect changes that have happened to GEOPM since
 September 2016 when they were recorded.  In particular, the videos
-do not use the geopmpy.launcher launch wrapper which was introduced
+do not use the geopmpy.launcher launch wrapper, which was introduced
 prior to the v0.3.0 alpha release.  The tutorial scripts have been
 updated to use the launcher, but the videos have not.
 
@@ -81,9 +81,9 @@ Step 1: A slightly more realistic application
 ---------------------------------------------
 Tutorial 1 shows a slightly more realistic application.  This
 application implements a loop that does a number of different types of
-operations.  In addition to sleeping, the loop does a memory intensive
-operation, then a compute intensive operation, then again does a
-memory intensive operation followed by a communication intensive
+operations.  In addition to sleeping, the loop does a memory-intensive
+operation, then a compute-intensive operation, then again does a
+memory-intensive operation followed by a communication-intensive
 operation.  In this example we are again using GEOPM without including
 any GEOPM APIs in the application and using LD_PRELOAD to interpose
 GEOPM on MPI.
@@ -125,7 +125,7 @@ from from tutorial by 3 having the application sleep for a period of
 time proportional to the amount of work done rather than simply
 increasing the amount of work done.  This type of modeling is useful
 when the amount of work within cannot be easily scaled.  The imbalance
-is controlled by a file who's path is given by the IMBALANCER_CONFIG
+is controlled by a file whose path is given by the IMBALANCER_CONFIG
 environment variable.  This file gives a list of hostnames and
 imbalance injection fraction.  An example file might be:
 
@@ -162,8 +162,8 @@ operations in each call to execute the region.  These include memory
 allocation, value initialization and memory deallocation.  In tutorial
 6 we move these start-up and shutdown operations into the beginning
 and end of the application so that the execution of a region is
-dedicated entirely to a compute intensive (DGEMM), memory intensive
-(stream) or network intensive (all2all) operation.  The ModelRegion
+dedicated entirely to a compute-intensive (DGEMM), memory-intensive
+(stream) or network-intensive (all2all) operation.  The ModelRegion
 and ModelApplication will form the basis for the GEOPM integration
 tests.
 
