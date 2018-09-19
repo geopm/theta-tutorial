@@ -9,8 +9,11 @@ can be loaded into the user's environment with the command:
 
 This will add the paths to the user's environment for access to the
 libraries, binaries, man pages and source code headers for the system
-installed version of GEOPM.  Links to all of the geopm man pages can
-be accessed by requesting the GEOPM overview man page
+installed version of GEOPM.  The version of GEOPM installed is
+[0.5.1+dev80gbdddc85e](https://github.com/geopm/geopm/commit/bdddc85e)
+which is 80 commits ahead of version 0.5.1 on the 'dev' branch of
+github.  Links to all of the geopm man pages can be accessed by
+requesting the GEOPM overview man page
 [geopm(7)](https://geopm.github.io/man/geopm.7.html):
 
     man geopm
