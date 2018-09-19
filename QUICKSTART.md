@@ -203,7 +203,9 @@ line:
 
     -L$GEOPM_LIB -lgeopm -dynamic
 
-Note that dynamic linking is required with the -dynamic flag.
+Note that dynamic linking is required with the -dynamic flag.  Once
+you have linked your application against libgeopm, the
+'--geopm-preload' option to geopmaprun is no longer required.
 
 Selecting an Agent
 ------------------
