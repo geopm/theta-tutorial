@@ -37,7 +37,7 @@ specifying the --geopm-preload option:
 
     geopmagent -a monitor -p None > monitor_policy.json
 
-    geopmaprun -N NUM_RANK_PER_NODE -n NUM_RANK [OTHER_APRUN_OPTIONS] \
+    geopmaprun -n NUM_RANK -N NUM_RANK_PER_NODE [OTHER_APRUN_OPTIONS] \
         --geopm-preload --geopm-ctl=process \
         --geopm-agent=monitor --geopm-policy=monitor_policy.json \
         --geopm-report=report.txt --geopm-trace=trace.csv \
@@ -71,6 +71,41 @@ describes:
 The report file will contain information about time and energy spent
 in MPI regions and outside of MPI regions as well as the average CPU
 frequency.
+
+Known Issues
+------------
+The GEOPM job launch script, geopmaprun, queries and uses the
+OMP_NUM_THREADS environment variable to choose affinity masks for each
+process.  For this reason, it is required to set the OMP_NUM_THREADS
+environment variable in the shell the executes geopmaprun, and should
+not be passed to the application sub-shell with the aprun '-e' option.
+
+GOOD:
+
+    OMP_NUM_THREADS=64 geopmaprun -N 1 -n 1 ...
+
+BAD:
+
+    geopmaprun -e 'OMP_NUM_THREADS=64' -N1 -n1 ...
+
+Enabling geopmaprun to interpret the -e option is tracked as issue #360:
+
+https://github.com/geopm/geopm/issues/360
+
+The principle job of the geopmaprun wrapper to aprun is to set
+explicit per-process CPU affinity masks that will optimize performance
+while enabling the GEOPM controller thread to run on a core isolated
+from the cores used by the primary application.  For this reason it is
+important not use provide any affinity related flags to geopmaprun.
+Please to not specify either of the CPU binding aprun options when
+using geopmaprun: '-cc'/'--cpu-binding', or
+'-cp'/'--cpu-binding-file'.  The geopmaprun does not interpret the
+'-j'/'--cpus-per-cu' option and it should not be used.  This option
+will either conflict with the explicit per process CPU masks that
+GEOPM creates, or it will not effect the affinitization.  With the
+asymmetry of the KNL NUMA configuration the '-S'/'--pes-per-numa-node'
+is not appropriate on the Theta system, but this option is also not
+interpreted by the geopmaprun wrapper.
 
 Adding GEOPM Mark-up to the Application
 ---------------------------------------
