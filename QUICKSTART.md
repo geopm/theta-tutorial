@@ -91,9 +91,8 @@ BAD:
 
     geopmaprun -e 'OMP_NUM_THREADS=64' -N1 -n1 ...
 
-Enabling geopmaprun to interpret the -e option is tracked as issue #360:
-
-https://github.com/geopm/geopm/issues/360
+Enabling geopmaprun to interpret the -e option is tracked as
+[issue #360](https://github.com/geopm/geopm/issues/360).
 
 The principle job of the geopmaprun wrapper to aprun is to set
 explicit per-process CPU affinity masks that will optimize performance
