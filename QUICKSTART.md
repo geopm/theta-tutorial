@@ -38,13 +38,29 @@ modifying its source code.  This can be accomplished by using the
 geopmaprun wrapper script for the ALPS aprun job launcher while
 specifying the --geopm-preload option:
 
-    geopmagent -a monitor -p None > monitor_policy.json
 
+    #!/bin/bash
+    #COBALT -t 30
+    #COBALT -n <NUM_NODE>
+    #COBALT -A <CHARGE_ACCOUNT>
+    #COBALT -O geopm_quickstart.$jobid
+    #COBALT -q debug-cache-quad
+    #COBALT --jobname geopm_quickstart
+    #COBALT --env JOBID=$jobid
+
+    module load geopm
+
+    # create policy file
+    geopmagent --agent=monitor \
+               --policy=None > monitor_policy.json
+
+    # Use GEOPM launcher wrapper script with ALPS's aprun
     geopmaprun -n NUM_RANK -N NUM_RANK_PER_NODE [OTHER_APRUN_OPTIONS] \
         --geopm-preload --geopm-ctl=process \
         --geopm-agent=monitor --geopm-policy=monitor_policy.json \
         --geopm-report=report.txt --geopm-trace=trace.csv \
         -- APPLICATION APP_OPTIONS
+
 
 Here "APPLICATION" is a place holder for the path to the application
 of choice, and "APP_OPTIONS" is a place holder for the command line
