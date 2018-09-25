@@ -124,9 +124,9 @@ using geopmaprun: '-cc'/'--cpu-binding', or
 '-j'/'--cpus-per-cu' option and it should not be used.  This option
 will either conflict with the explicit per process CPU masks that
 GEOPM creates, or it will not effect the affinitization.  With the
-asymmetry of the KNL NUMA configuration the '-S'/'--pes-per-numa-node'
-is not appropriate on the Theta system, but this option is also not
-interpreted by the geopmaprun wrapper.
+asymmetry of the KNL NUMA configuration, the '-S'/'--pes-per-numa-node'
+option is not appropriate on the Theta system, but this option is also
+not interpreted by the geopmaprun wrapper.
 
 ### Failure of msr-safe
 
@@ -142,62 +142,49 @@ In order to avoid that node in your allocation, a simple MSR read test can be
 performed to determine whether or not msr-safe is functional.  In order to
 attempt a read of an MSR through msr-safe, the ```geopmread``` command line
 utility can be utilized.  This must be invoked on the compute nodes through
-```aprun```.  The following bash script can be utilized to determine the
-hostnames of the nodes that are malfunctioning:
-
-#### check_rdmsr.sh
-```bash
-#!/bin/bash
-
-# Try to read a MSR.  Print the hostname if it fails.
-geopmread POWER_PACKAGE_TDP package >& /dev/null || hostname | sed -e 's/nid[0]*//'
-
-# Always return true to satisfy set -e
-true
-```
+```aprun```.
 
 In order to generate a comma separated list of bad nodes, the following bash
 function can be utilized:
 
 ```bash
-get_bad_nodes(){
+get_bad_nodes() {
+# Try to read a MSR.  Print the hostname if it fails.
     CHECK_RDMSR=check_rdmsr.sh
-    OUTPUT=$(aprun -n${COBALT_JOBSIZE} -N1 -q ${CHECK_RDMSR})
-    OUTPUT=$(echo -n ${OUTPUT} | sed 's/\>/,/g;s/,$//;s/ //g')
-    echo -n ${OUTPUT}
+    echo '#!/bin/bash' > $CHECK_RDMSR
+    echo "geopmread POWER_PACKAGE_TDP package 0 >& /dev/null || hostname | sed -e 's/nid[0]*//'" >> $CHECK_RDMSR
+    echo 'true' >> $CHECK_RDMSR
+    chmod u+x $CHECK_RDMSR
+    BAD_NODES=$(aprun -n $COBALT_JOBSIZE -N1 -q ./$CHECK_RDMSR | sed 's/\>/,/g;s/,$//;s/ //g')
+    echo -n $BAD_NODES
+    rm -f $CHECK_RDMSR
+    if [ -z "$BAD_NODES" ]; then
+        NUM_BAD_NODES=0
+    else
+        NUM_BAD_NODES=$(echo $BAD_NODES | sed 's|[^,]||g' | wc -c)
+    fi
+    if [ $1 -gt $(($COBALT_JOBSIZE - $NUM_BAD_NODES)) ]; then
+        >&2 echo "Error: number of msr-safe enabled nodes is less than number of nodes required!"
+        >&2 echo "Warning: msr-safe failure detected on the following nodes: $BAD_NODES"
+        exit 1
+    fi
 }
 ```
 
-Finally, the function output can be passed directly to ```geopmaprun``` (or
+The function output can be passed directly to ```geopmaprun``` (or
 ```aprun```) to avoid those nodes with the ```-E, ‐‐exclude‐node‐list```
 option:
 
 ```bash
-BAD_NODES="$(get_bad_nodes)"
-geopmaprun -E ${BAD_NODES} ...
+NUM_REQUIRED_NODES= ...
+BAD_NODES="$(get_bad_nodes $NUM_REQUIRED_NODES)"
+geopmaprun -E $BAD_NODES ...
 
 ```
 
 To account for this issue, you will need to request a few more nodes than are
 actually required for your experiment.  In our recent testing, allowing for 4
 nodes to fail in a request of 256 appears optimal.
-
-To determine the number of nodes with an issue, utilize the following:
-```bash
-NUM_BAD=$(python -c "a='${BAD_NODES}'.split(','); a = filter(lambda x: x != '', a); print len(a)")
-```
-
-The above block can then be combined with an additional parameter in your batch
-script to ensure you have a minimum number of correctly functioning nodes:
-
-```bash
-let AVAILABLE_NODES=${COBALT_JOBSIZE}-${NUM_BAD}
-if [ "${AVAILABLE_NODES}" -lt "${DESIRED_NODES}" ]; then
-    echo "ERROR: AVAILABLE_NODES is less than DESIRED_NODES!"
-    echo "WARNING: msr-safe failure detected on the following nodes: ${BAD_NODES}"
-    exit 1
-fi
-```
 
 Adding GEOPM Mark-up to the Application
 ---------------------------------------
