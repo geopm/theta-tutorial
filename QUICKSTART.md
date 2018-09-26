@@ -184,7 +184,9 @@ geopmaprun -E $BAD_NODES ...
 
 To account for this issue, you will need to request a few more nodes than are
 actually required for your experiment.  In our recent testing, allowing for 4
-nodes to fail in a request of 256 appears optimal.
+nodes to fail in a request of 256 appears optimal.  Integration of this fix
+into the launcher to make this node exclusion automatic is tracked by
+[issue #366](https://github.com/geopm/geopm/issues/366).
 
 Adding GEOPM Mark-up to the Application
 ---------------------------------------
