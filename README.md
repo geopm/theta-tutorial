@@ -39,9 +39,9 @@ The first thing an HPC application user will want to do when
 integrating their application with the GEOPM runtime is to analyze
 performance of the application without modifying its source code.
 This is shown in the COBALT script called tutorial_0.cobalt.  This
-script can be submitted directly to the COBALT queue.  The user
-must have the COBALT_PROJ environment variable set or the -A option
-must be added to the cobalt options in the script headers.
+script can be submitted directly to the COBALT queue:
+
+    qsub -A <PROJECT_NAME> tutorial_0.cobalt
 
 The COBALT script uses the geopmaprun wrapper script for the ALPS
 aprun job launcher:
