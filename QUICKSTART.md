@@ -172,7 +172,7 @@ get_bad_nodes() {
 ```
 
 The function output can be passed directly to ```geopmaprun``` (or
-```aprun```) to avoid those nodes with the ```-E, ‐‐exclude‐node‐list```
+```aprun```) to avoid those nodes with the ```-E, --exclude-node-list```
 option:
 
 ```bash
