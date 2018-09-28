@@ -18,9 +18,12 @@ module load geopm
 geopmagent --agent=monitor \
            --policy=None > tutorial_montor_policy.json
 
+export OMP_NUM_THREADS=15
+
 # Use GEOPM launcher wrapper script with ALPS's aprun
 geopmaprun -N 4 \
            -n 8 \
+           -r 3 \
            --geopm-ctl=process \
            --geopm-agent=monitor \
            --geopm-policy=tutorial_monitor_policy.json \

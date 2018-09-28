@@ -22,9 +22,12 @@ geopmagent --agent=power_balancer \
            --policy=150,0,0,0 > tutorial_balanced_policy.json
 
 
+export OMP_NUM_THREADS=15
+
 # Use GEOPM launcher wrapper script with ALPS's aprun
 geopmaprun -N 4 \
            -n 8 \
+           -r 3 \
            --geopm-ctl=process \
            --geopm-report=tutorial_3_governed_report \
            --geopm-trace=tutorial_3_governed_trace \
@@ -34,6 +37,7 @@ geopmaprun -N 4 \
 && \
 geopmaprun -N 4 \
            -n 8 \
+           -r 3 \
            --geopm-ctl=process \
            --geopm-report=tutorial_3_balanced_report \
            --geopm-trace=tutorial_3_balanced_trace \

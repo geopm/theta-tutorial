@@ -1,5 +1,5 @@
 #!/bin/bash
-#COBALT -t 30
+#COBALT -t 60
 #COBALT -n 2
 #COBALT -O geopm_tutorial_all.$jobid
 #COBALT -q debug-cache-quad
@@ -24,11 +24,13 @@ if [ ! -e $IMBALANCER_CONFIG ]; then
     echo $one_host 0.1 > $IMBALANCER_CONFIG
 fi
 
+export OMP_NUM_THREADS=15
 
 echo '############### Tutorial 0 ###############'
 >&2 echo '############### Tutorial 0 ###############'
 geopmaprun -N 4 \
            -n 8 \
+           -r 3 \
            --geopm-preload \
            --geopm-ctl=process \
            --geopm-report=tutorial_0_report \
@@ -42,6 +44,7 @@ echo '############### Tutorial 1 ###############'
 
 geopmaprun -N 4 \
            -n 8 \
+           -r 3 \
            --geopm-preload \
            --geopm-ctl=process \
            --geopm-report=tutorial_1_report \
@@ -55,6 +58,7 @@ echo '############### Tutorial 2 ###############'
 
 geopmaprun -N 4 \
            -n 8 \
+           -r 3 \
            --geopm-ctl=process \
            --geopm-report=tutorial_2_report \
            --geopm-trace=tutorial_2_trace \
@@ -67,6 +71,7 @@ echo '############### Tutorial 3 ###############'
 
 geopmaprun -N 4 \
            -n 8 \
+           -r 3 \
            --geopm-ctl=process \
            --geopm-report=tutorial_3_governed_report \
            --geopm-trace=tutorial_3_governed_trace \
@@ -76,6 +81,7 @@ geopmaprun -N 4 \
 
 geopmaprun -N 4 \
            -n 8 \
+           -r 3 \
            --geopm-ctl=process \
            --geopm-report=tutorial_3_balanced_report \
            --geopm-trace=tutorial_3_balanced_trace \
@@ -88,6 +94,7 @@ echo '############### Tutorial 4 ###############'
 
 geopmaprun -N 4 \
            -n 8 \
+           -r 3 \
            --geopm-ctl=process \
            --geopm-report=tutorial_4_governed_report \
            --geopm-trace=tutorial_4_governed_trace \
@@ -97,6 +104,7 @@ geopmaprun -N 4 \
 
 geopmaprun -N 4 \
            -n 8 \
+           -r 3 \
            --geopm-ctl=process \
            --geopm-report=tutorial_4_balanced_report \
            --geopm-trace=tutorial_4_balanced_trace \
@@ -110,6 +118,7 @@ echo '############### Tutorial 5 ###############'
 
 geopmaprun -N 4 \
            -n 8 \
+           -r 3 \
            --geopm-ctl=process \
            --geopm-agent=monitor \
            --geopm-policy=tutorial_monitor_policy.json \
@@ -122,6 +131,7 @@ echo '############### Tutorial 6 ###############'
 
 geopmaprun -N 4 \
            -n 8 \
+           -r 3 \
            --geopm-ctl=process \
            --geopm-agent=monitor \
            --geopm-policy=tutorial_monitor_policy.json \
