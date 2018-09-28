@@ -1,0 +1,134 @@
+#!/bin/bash
+#COBALT -t 30
+#COBALT -n 2
+#COBALT -O geopm_tutorial_all.$jobid
+#COBALT -q debug-cache-quad
+#COBALT --jobname geopm_tutorial_all
+#COBALT --env JOBID=$jobid
+
+module load geopm
+
+geopmagent --agent=monitor \
+           --policy=None > tutorial_monitor_policy.json
+geopmagent --agent=power_governor \
+           --policy=150 > tutorial_governed_policy.json
+geopmagent --agent=power_balancer \
+           --policy=150,0,0,0 > tutorial_balanced_policy.json
+
+if [ ! $IMBALANCER_CONFIG ]; then
+    export IMBALANCER_CONFIG=tutorial_4_imbalance.conf
+fi
+# Create configuration file for Imbalancer if it doesn't exist.
+if [ ! -e $IMBALANCER_CONFIG ]; then
+    one_host=$(aprun -n 1 -N 1 hostname | head -n1)
+    echo $one_host 0.1 > $IMBALANCER_CONFIG
+fi
+
+
+echo '############### Tutorial 0 ###############'
+>&2 echo '############### Tutorial 0 ###############'
+geopmaprun -N 4 \
+           -n 8 \
+           --geopm-preload \
+           --geopm-ctl=process \
+           --geopm-report=tutorial_0_report \
+           --geopm-trace=tutorial_0_trace \
+           --geopm-agent=monitor \
+           --geopm-policy=tutorial_monitor_policy.json \
+           -- ./tutorial_0
+
+echo '############### Tutorial 1 ###############'
+>&2 echo '############### Tutorial 1 ###############'
+
+geopmaprun -N 4 \
+           -n 8 \
+           --geopm-preload \
+           --geopm-ctl=process \
+           --geopm-report=tutorial_1_report \
+           --geopm-trace=tutorial_1_trace \
+           --geopm-agent=monitor \
+           --geopm-policy=tutorial_monitor_policy.json \
+           -- ./tutorial_1
+
+echo '############### Tutorial 2 ###############'
+>&2 echo '############### Tutorial 2 ###############'
+
+geopmaprun -N 4 \
+           -n 8 \
+           --geopm-ctl=process \
+           --geopm-report=tutorial_2_report \
+           --geopm-trace=tutorial_2_trace \
+           --geopm-agent=monitor \
+           --geopm-policy=tutorial_monitor_policy.json \
+           -- ./tutorial_2
+
+echo '############### Tutorial 3 ###############'
+>&2 echo '############### Tutorial 3 ###############'
+
+geopmaprun -N 4 \
+           -n 8 \
+           --geopm-ctl=process \
+           --geopm-report=tutorial_3_governed_report \
+           --geopm-trace=tutorial_3_governed_trace \
+           --geopm-agent=power_governor \
+           --geopm-policy=tutorial_governed_policy.json \
+           -- ./tutorial_3 \
+
+geopmaprun -N 4 \
+           -n 8 \
+           --geopm-ctl=process \
+           --geopm-report=tutorial_3_balanced_report \
+           --geopm-trace=tutorial_3_balanced_trace \
+           --geopm-agent=power_balancer \
+           --geopm-policy=tutorial_balanced_policy.json \
+           -- ./tutorial_3
+
+echo '############### Tutorial 4 ###############'
+>&2 echo '############### Tutorial 4 ###############'
+
+geopmaprun -N 4 \
+           -n 8 \
+           --geopm-ctl=process \
+           --geopm-report=tutorial_4_governed_report \
+           --geopm-trace=tutorial_4_governed_trace \
+           --geopm-agent=power_governor \
+           --geopm-policy=tutorial_governed_policy.json \
+           -- ./tutorial_4 \
+
+geopmaprun -N 4 \
+           -n 8 \
+           --geopm-ctl=process \
+           --geopm-report=tutorial_4_balanced_report \
+           --geopm-trace=tutorial_4_balanced_trace \
+           --geopm-agent=power_balancer \
+           --geopm-policy=tutorial_balanced_policy.json \
+           -- ./tutorial_4
+
+
+echo '############### Tutorial 5 ###############'
+>&2 echo '############### Tutorial 5 ###############'
+
+geopmaprun -N 4 \
+           -n 8 \
+           --geopm-ctl=process \
+           --geopm-agent=monitor \
+           --geopm-policy=tutorial_monitor_policy.json \
+           --geopm-report=tutorial_5_report \
+           --geopm-trace=tutorial_5_trace \
+           -- ./tutorial_5
+
+echo '############### Tutorial 6 ###############'
+>&2 echo '############### Tutorial 6 ###############'
+
+geopmaprun -N 4 \
+           -n 8 \
+           --geopm-ctl=process \
+           --geopm-agent=monitor \
+           --geopm-policy=tutorial_monitor_policy.json \
+           --geopm-report=tutorial_6_report \
+           --geopm-trace=tutorial_6_trace \
+           -- ./tutorial_6 tutorial_6_config.json
+
+
+echo '############### End Tutorials ###############'
+>&2 echo '############### End Tutorials ###############'
