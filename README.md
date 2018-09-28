@@ -1,14 +1,21 @@
 GEOPM TUTORIAL
 ==============
 
-This directory contains a step by step tutorial on how to use the
-GEOPM package.  Each step has an associated source and script file.
-The script file will run the associated program and demonstrate a
-GEOPM feature.  This tutorial has been modified from the standard
-GEOPM tutorial to be specific to the ALCF's Theta system.  It makes
-use of the geopm module that is installed there.  Each step in the
-tutorial is documented below in this README.  The tutorial is a work
-in progress.
+The top level directory of this repository contains a
+[quick-start](QUICKSTART.md) guide to using the geopm module on ALCF's
+Theta machine.  This gives basic instructions on how to get started
+with GEOPM on Theta and provides some work arounds for some known
+issues.
+
+The other files in this repository provide a step by step tutorial on
+how to use the GEOPM package.  Each step has an associated source and
+cobalt script file.  The cobalt script file will run the associated
+program and demonstrate a GEOPM feature.  This tutorial has been
+modified from the standard GEOPM tutorial to be specific to the ALCF's
+Theta system.  It makes use of the geopm module that is installed
+there and the scripts have been modified to use the cobalt resource
+manager.  Each step in the tutorial is documented below in this
+README.
 
 A video demonstration of these tutorials is available online here:
 
@@ -22,10 +29,8 @@ updated to use the launcher, but the videos have not.
 
 Building the tutorials
 ----------------------
-A simple Makefile which is not part of the GEOPM autotools build
-system compiles the tutorial code.  There is a build script that will
-compile the tutorials with the make file using the Theta environment
-called tutorial_build_theta.sh.
+There is a build script called tutorial_build_theta.sh that will
+compile the tutorials with the Makefile using the Theta environment.
 
 
 Step 0: Profiling and Tracing an Unmodified Application
@@ -137,7 +142,7 @@ which would inject 25% extra time on node with hostname
 "my-cluster-node3" and 15% extra time on node "my-cluster-node11" for
 each pass through the loop.  All nodes which have hostnames that are
 not included in the configuration file will perform normally.  The
-tutorial_4.sh script will create a configuration file called
+tutorial_4.cobalt script will create a configuration file called
 "tutorial_3_imbalance.conf" if one does not exist, and one of the
 nodes will have a 10% injection of imbalance.  The node is chosen
 arbitrarily by a race if the configuration file is not present.
