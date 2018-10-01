@@ -13,12 +13,12 @@ echo "geopmread POWER_PACKAGE_TDP package 0 >& /dev/null || hostname | sed -e 's
 echo 'true' >> $CHECK_RDMSR
 chmod u+x $CHECK_RDMSR
 BAD_NODES=$(aprun -n $COBALT_JOBSIZE -N1 -q ./$CHECK_RDMSR | tr '\n' ' ' | sed 's/\>/,/g;s/ //g;s/,$//')
-echo -n $BAD_NODES
 rm -f $CHECK_RDMSR
 if [ -z "$BAD_NODES" ]; then
     NUM_BAD_NODES=0
 else
     NUM_BAD_NODES=$(echo $BAD_NODES | sed 's|[^,]||g' | wc -c)
+    echo -n "-E $BAD_NODES"
 fi
 if [ $REQUIRED_NUM_NODES -gt $(($COBALT_JOBSIZE - $NUM_BAD_NODES)) ]; then
     >&2 echo "Error: number of msr-safe enabled nodes is less than number of nodes required!"
