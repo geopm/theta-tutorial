@@ -144,42 +144,19 @@ attempt a read of an MSR through msr-safe, the ```geopmread``` command line
 utility can be utilized.  This must be invoked on the compute nodes through
 ```aprun```.
 
-In order to generate a comma separated list of bad nodes, the following bash
-function can be utilized:
-
-```bash
-get_bad_nodes() {
-# Try to read a MSR.  Print the hostname if it fails.
-    CHECK_RDMSR=check_rdmsr.sh
-    echo '#!/bin/bash' > $CHECK_RDMSR
-    echo "geopmread POWER_PACKAGE_TDP package 0 >& /dev/null || hostname | sed -e 's/nid[0]*//'" >> $CHECK_RDMSR
-    echo 'true' >> $CHECK_RDMSR
-    chmod u+x $CHECK_RDMSR
-    BAD_NODES=$(aprun -n $COBALT_JOBSIZE -N1 -q ./$CHECK_RDMSR | sed 's/\>/,/g;s/,$//;s/ //g')
-    echo -n $BAD_NODES
-    rm -f $CHECK_RDMSR
-    if [ -z "$BAD_NODES" ]; then
-        NUM_BAD_NODES=0
-    else
-        NUM_BAD_NODES=$(echo $BAD_NODES | sed 's|[^,]||g' | wc -c)
-    fi
-    if [ $1 -gt $(($COBALT_JOBSIZE - $NUM_BAD_NODES)) ]; then
-        >&2 echo "Error: number of msr-safe enabled nodes is less than number of nodes required!"
-        >&2 echo "Warning: msr-safe failure detected on the following nodes: $BAD_NODES"
-        exit 1
-    fi
-}
-```
-
-The function output can be passed directly to ```geopmaprun``` (or
-```aprun```) to avoid those nodes with the ```-E, --exclude-node-list```
-option:
+In order to generate a comma separated list of bad nodes, the
+[exclude_nodes.sh](exclude_nodes.sh) script included in this repository
+can be utilized.  The script output can be passed directly to
+```geopmaprun``` (or ```aprun```) to avoid those nodes with the
+```-E, --exclude-node-list``` option:
 
 ```bash
 NUM_REQUIRED_NODES= ...
-BAD_NODES="$(get_bad_nodes $NUM_REQUIRED_NODES)"
-geopmaprun -E $BAD_NODES ...
-
+EXCLUDE_NODES=$(./exclude_nodes.sh $NUM_REQUIRED_NODES)
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+geopmaprun -E $EXCLUDE_NODES ...
 ```
 
 To account for this issue, you will need to request a few more nodes than are
