@@ -10,10 +10,9 @@ can be loaded into the user's environment with the command:
 This will add the paths to the user's environment for access to the
 libraries, binaries, man pages and source code headers for the system
 installed version of GEOPM.  The version of GEOPM installed is
-[0.5.1+dev100g4d1dff07](https://github.com/geopm/geopm/commit/4d1dff07)
-which is 100 commits ahead of version 0.5.1 on the 'dev' branch of
-github.  Links to all of the geopm man pages can be accessed by
-requesting the GEOPM overview man page
+[0.6.1](https://github.com/geopm/geopm/releases/tag/v0.6.1) which is
+the latest stable release.  Links to all of the geopm man pages can be
+accessed by requesting the GEOPM overview man page
 [geopm(7)](https://geopm.github.io/man/geopm.7.html):
 
     man geopm
@@ -93,6 +92,14 @@ frequency.
 
 Known Issues
 ------------
+
+### Conflict with Darshan module
+
+The GEOPM runtime uses the PMPI interface for profiling MPI calls.
+The Darshan module also uses the PMPI interface, and this conflicts
+with GEOPM's use.  The GEOPM module file should define this conflict,
+and therefore prevent the loading of the geopm module when darshan is
+loaded, but this has not yet been implemented.
 
 ### Rank/Thread Pinning
 
