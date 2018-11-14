@@ -97,9 +97,8 @@ Known Issues
 
 The GEOPM runtime uses the PMPI interface for profiling MPI calls.
 The Darshan module also uses the PMPI interface, and this conflicts
-with GEOPM's use.  The GEOPM module file should define this conflict,
-and therefore prevent the loading of the geopm module when darshan is
-loaded, but this has not yet been implemented.
+with GEOPM's use.  The darshan module should be unloaded prior to
+loading the GEOPM module to avoid this conflict.
 
 ### Rank/Thread Pinning
 
