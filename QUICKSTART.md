@@ -162,7 +162,7 @@ EXCLUDE_NODES=$(./exclude_nodes.sh $NUM_REQUIRED_NODES)
 if [ $? -ne 0 ]; then
     exit 1
 fi
-geopmaprun -E $EXCLUDE_NODES ...
+geopmaprun $EXCLUDE_NODES ...
 ```
 
 To account for this issue, you will need to request a few more nodes than are
