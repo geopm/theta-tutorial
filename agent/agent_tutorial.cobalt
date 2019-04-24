@@ -18,12 +18,13 @@ export GEOPM_PLUGIN_PATH=$GEOPM_TUTORIAL/iogroup:$GEOPM_TUTORIAL/agent
 # create trace files
 
 # Use GEOPM launcher wrapper script with ALPS's aprun
-geopmaprun -N 4 \
-           -n 8 \
-           --geopm-ctl=process \
-           --geopm-report=agent_tutorial_report \
-           --geopm-trace=agent_tutorial_trace \
-           --geopm-agent=example \
-           --geopm-policy=example_policy.json \
-           -- geopmbench agent_tutorial_config.json \
-           1>example.stdout 2>example.stderr
+geopmlaunch aprun \
+            -N 4 \
+            -n 8 \
+            --geopm-ctl=process \
+            --geopm-report=agent_tutorial_report \
+            --geopm-trace=agent_tutorial_trace \
+            --geopm-agent=example \
+            --geopm-policy=example_policy.json \
+            -- geopmbench agent_tutorial_config.json \
+            1>example.stdout 2>example.stderr

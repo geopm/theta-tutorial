@@ -10,7 +10,7 @@ can be loaded into the user's environment with the command:
 This will add the paths to the user's environment for access to the
 libraries, binaries, man pages and source code headers for the system
 installed version of GEOPM.  The version of GEOPM installed is
-[0.6.1](https://github.com/geopm/geopm/releases/tag/v0.6.1) which is
+[1.0.0](https://github.com/geopm/geopm/releases/tag/v1.0.0) which is
 the latest stable release.  Links to all of the geopm man pages can be
 accessed by requesting the GEOPM overview man page
 [geopm(7)](https://geopm.github.io/man/geopm.7.html):
@@ -22,9 +22,9 @@ The first GEOPM interfaces that are covered here are the
 
     man geopmagent
 
-and the [geopmaprun(1)](https://geopm.github.io/man/geopmaprun.1.html):
+and the [geopmlaunch(1)](https://geopm.github.io/man/geopmlaunch.1.html):
 
-    man geopmaprun
+    man geopmlaunch
 
 command line utilities.
 
@@ -34,7 +34,7 @@ The first thing an HPC application user will want to do when
 integrating their application with the GEOPM runtime is to analyze
 performance of the application without recompiling the application or
 modifying its source code.  This can be accomplished by using the
-geopmaprun wrapper script for the ALPS aprun job launcher while
+geopmlaunch wrapper script for the ALPS aprun job launcher while
 specifying the --geopm-preload option:
 
 
@@ -49,14 +49,9 @@ specifying the --geopm-preload option:
 
     module load geopm
 
-    # create policy file
-    geopmagent --agent=monitor \
-               --policy=None > monitor_policy.json
-
     # Use GEOPM launcher wrapper script with ALPS's aprun
-    geopmaprun -n NUM_RANK -N NUM_RANK_PER_NODE [OTHER_APRUN_OPTIONS] \
+    geopmlaunch aprun -n NUM_RANK -N NUM_RANK_PER_NODE [OTHER_APRUN_OPTIONS] \
         --geopm-preload --geopm-ctl=process \
-        --geopm-agent=monitor --geopm-policy=monitor_policy.json \
         --geopm-report=report.txt --geopm-trace=trace.csv \
         -- APPLICATION APP_OPTIONS
 
@@ -71,7 +66,7 @@ unmodified binaries.
 
 The above example uses the command line option to the launcher
 "--geopm-ctl=process" which launches the controller as an extra MPI
-process per node.  Note that the geopmaprun command will print to
+process per node.  Note that the geopmlaunch command will print to
 standard output the interpreted command that was executed and that
 this output will show an extra rank per node requested.
 
@@ -102,37 +97,37 @@ loading the GEOPM module to avoid this conflict.
 
 ### Rank/Thread Pinning
 
-The GEOPM job launch script, geopmaprun, queries and uses the
+The GEOPM job launch script, geopmlaunch, queries and uses the
 OMP_NUM_THREADS environment variable to choose affinity masks for each
 process.  For this reason, it is required to set the OMP_NUM_THREADS
-environment variable in the shell that executes geopmaprun, and should
+environment variable in the shell that executes geopmlaunch, and should
 not be passed to the application sub-shell with the aprun '-e' option.
 
 GOOD:
 
-    OMP_NUM_THREADS=64 geopmaprun -N 1 -n 1 ...
+    OMP_NUM_THREADS=64 geopmlaunch -N 1 -n 1 ...
 
 BAD:
 
-    geopmaprun -e 'OMP_NUM_THREADS=64' -N1 -n1 ...
+    geopmlaunch -e 'OMP_NUM_THREADS=64' -N1 -n1 ...
 
-Enabling geopmaprun to interpret the -e option is tracked as
+Enabling geopmlaunch to interpret the -e option is tracked as
 [issue #360](https://github.com/geopm/geopm/issues/360).
 
-The principal job of the geopmaprun wrapper to aprun is to set
+The principal job of the geopmlaunch wrapper to aprun is to set
 explicit per-process CPU affinity masks that will optimize performance
 while enabling the GEOPM controller thread to run on a core isolated
 from the cores used by the primary application.  For this reason it is
-important not to provide any affinity related flags to geopmaprun.
+important not to provide any affinity related flags to geopmlaunch.
 Please do not specify either of the CPU binding aprun options when
-using geopmaprun: '-cc'/'--cpu-binding', or
-'-cp'/'--cpu-binding-file'.  The geopmaprun does not interpret the
-'-j'/'--cpus-per-cu' option and it should not be used.  This option
+using geopmlaunch: '-cc'/'--cpu-binding', or
+'-cp'/'--cpu-binding-file'.  The geopmlaunch command does not interpret
+the '-j'/'--cpus-per-cu' option and it should not be used.  This option
 will either conflict with the explicit per process CPU masks that
 GEOPM creates, or it will not effect the affinitization.  With the
 asymmetry of the KNL NUMA configuration, the '-S'/'--pes-per-numa-node'
 option is not appropriate on the Theta system, but this option is also
-not interpreted by the geopmaprun wrapper.
+not interpreted by the geopmlaunch wrapper.
 
 ### Failure of msr-safe
 
@@ -153,7 +148,7 @@ utility can be utilized.  This must be invoked on the compute nodes through
 In order to generate a comma separated list of bad nodes, the
 [exclude_nodes.sh](exclude_nodes.sh) script included in this repository
 can be utilized.  The script output can be passed directly to
-```geopmaprun``` (or ```aprun```) to avoid those nodes with the
+```geopmlaunch``` (or ```aprun```) to avoid those nodes with the
 ```-E, --exclude-node-list``` option:
 
 ```bash
@@ -162,7 +157,7 @@ EXCLUDE_NODES=$(./exclude_nodes.sh $NUM_REQUIRED_NODES)
 if [ $? -ne 0 ]; then
     exit 1
 fi
-geopmaprun $EXCLUDE_NODES ...
+geopmlaunch $EXCLUDE_NODES ...
 ```
 
 To account for this issue, you will need to request a few more nodes than are
@@ -250,7 +245,7 @@ line:
 
 Note that dynamic linking is required with the -dynamic flag.  Once
 you have linked your application against libgeopm, the
-'--geopm-preload' option to geopmaprun is no longer required.
+'--geopm-preload' option to geopmlaunch is no longer required.
 
 Selecting an Agent
 ------------------
@@ -269,7 +264,7 @@ each of these is documented in a man page:
 
 Please read through the features that these Agents implement, and try
 using them with your application.  The agent is selected with the
---geopm-agent command line option for the geopmaprun(1) command and
+--geopm-agent command line option for the geopmlaunch(1) command and
 the JSON policy file for each agent can be generated with the
 geopmagent(1) command line tool.  See links to the web version of each
 Agent man page:
@@ -283,6 +278,4 @@ used by the processor socket, and this limit is selected by the user.
 We are working on modifications to the power_balancer agent to enable
 it to provide some energy saving capabilities when the power limit is
 set to TDP (215 Watts on the Theta KNL SKUs) or higher, but this is a
-work in progress. On the KNL architecture (i.e. Theta) the
-energy_efficient Agent is not very effective at saving energy,
-although on Xeon architectures it can work quite well.
+work in progress.

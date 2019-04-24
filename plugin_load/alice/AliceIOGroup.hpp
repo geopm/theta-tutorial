@@ -30,29 +30,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EXAMPLEIOGROUP_HPP_INCLUDE
-#define EXAMPLEIOGROUP_HPP_INCLUDE
+#ifndef ALICEIOGROUP_HPP_INCLUDE
+#define ALICEIOGROUP_HPP_INCLUDE
 
 #include <map>
-#include <vector>
 #include <string>
-#include <memory>
 
 #include "geopm/PluginFactory.hpp"
 #include "geopm/IOGroup.hpp"
 
-namespace geopm
-{
-    class PlatformTopo;
-}
-
-/// @brief IOGroup that provides a signals for user and idle CPU time, and
-///        a control for writing to standard output.
-class ExampleIOGroup : public geopm::IOGroup
+class AliceIOGroup : public geopm::IOGroup
 {
     public:
-        ExampleIOGroup();
-        virtual ~ExampleIOGroup() = default;
+        AliceIOGroup();
+        virtual ~AliceIOGroup() = default;
         std::set<std::string> signal_names(void) const override;
         std::set<std::string> control_names(void) const override;
         bool is_valid_signal(const std::string &signal_name) const override;
@@ -75,30 +66,13 @@ class ExampleIOGroup : public geopm::IOGroup
         static std::string plugin_name(void);
         static std::unique_ptr<geopm::IOGroup> make_plugin(void);
     private:
-        std::vector<std::string> parse_proc_stat(void);
         enum m_signal_type_e {
-            M_SIGNAL_USER_TIME,
-            M_SIGNAL_NICE_TIME,
-            M_SIGNAL_SYSTEM_TIME,
-            M_SIGNAL_IDLE_TIME,
+            M_SIGNAL_FOO,
+            M_SIGNAL_BAR,
+            M_SIGNAL_TIME,
             M_NUM_SIGNAL
         };
-        enum m_control_type_e {
-            M_CONTROL_STDOUT,
-            M_CONTROL_STDERR,
-            M_NUM_CONTROL
-        };
-        const geopm::PlatformTopo &m_platform_topo;
-        /// Whether any signal has been pushed
-        bool m_do_batch_read;
-        /// Whether read_batch() has been called at least once
-        bool m_is_batch_read;
         std::map<std::string, int> m_signal_idx_map;
-        std::map<std::string, int> m_control_idx_map;
-        std::vector<bool> m_do_read;
-        std::vector<bool> m_do_write;
-        std::vector<std::string> m_signal_value;
-        std::vector<std::string> m_control_value;
 };
 
 #endif

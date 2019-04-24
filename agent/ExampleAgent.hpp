@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016, 2017, 2018, Intel Corporation
+ * Copyright (c) 2015, 2016, 2017, 2018, 2019, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,13 +35,13 @@
 
 #include <vector>
 
-#include "Agent.hpp"
+#include "geopm/Agent.hpp"
 #include "geopm_time.h"
 
 namespace geopm
 {
-    class IPlatformIO;
-    class IPlatformTopo;
+    class PlatformTopo;
+    class PlatformIO;
 }
 
 /// @brief Agent
@@ -49,24 +49,27 @@ class ExampleAgent : public geopm::Agent
 {
     public:
         ExampleAgent();
-        ExampleAgent(geopm::IPlatformIO &plat_io, geopm::IPlatformTopo &topo);
         virtual ~ExampleAgent() = default;
         void init(int level, const std::vector<int> &fan_in, bool is_level_root) override;
-        bool descend(const std::vector<double> &in_policy,
-                     std::vector<std::vector<double> >&out_policy) override;
-        bool ascend(const std::vector<std::vector<double> > &in_sample,
-                    std::vector<double> &out_sample) override;
-        bool adjust_platform(const std::vector<double> &in_policy) override;
-        bool sample_platform(std::vector<double> &out_sample) override;
+        void validate_policy(std::vector<double> &in_policy) const override;
+        void split_policy(const std::vector<double> &in_policy,
+                          std::vector<std::vector<double> > &out_policy) override;
+        bool do_send_policy(void) const override;
+        void aggregate_sample(const std::vector<std::vector<double> > &in_sample,
+                              std::vector<double> &out_sample) override;
+        bool do_send_sample(void) const override;
+        void adjust_platform(const std::vector<double> &in_policy) override;
+        bool do_write_batch(void) const override;
+        void sample_platform(std::vector<double> &out_sample) override;
         void wait(void) override;
         std::vector<std::pair<std::string, std::string> > report_header(void) const override;
-        std::vector<std::pair<std::string, std::string> > report_node(void) const override;
+        std::vector<std::pair<std::string, std::string> > report_host(void) const override;
         std::map<uint64_t, std::vector<std::pair<std::string, std::string> > > report_region(void) const override;
         std::vector<std::string> trace_names(void) const override;
         void trace_values(std::vector<double> &values) override;
 
         static std::string plugin_name(void);
-        static std::unique_ptr<Agent> make_plugin(void);
+        static std::unique_ptr<geopm::Agent> make_plugin(void);
         static std::vector<std::string> policy_names(void);
         static std::vector<std::string> sample_names(void);
     private:
@@ -108,11 +111,11 @@ class ExampleAgent : public geopm::Agent
             M_TRACE_VAL_SIGNAL_SYSTEM,
             M_TRACE_VAL_SIGNAL_IDLE,
             M_TRACE_VAL_SIGNAL_NICE,
-
+            M_NUM_TRACE_VAL
         };
 
-        geopm::IPlatformIO &m_platform_io;
-        geopm::IPlatformTopo &m_platform_topo;
+        geopm::PlatformIO &m_platform_io;
+        const geopm::PlatformTopo &m_platform_topo;
 
         std::vector<int> m_signal_idx;
         std::vector<int> m_control_idx;

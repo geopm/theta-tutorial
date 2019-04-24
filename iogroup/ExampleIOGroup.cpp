@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016, 2017, 2018, Intel Corporation
+ * Copyright (c) 2015, 2016, 2017, 2018, 2019, Intel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,19 +30,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "ExampleIOGroup.hpp"
+
 #include <cmath>
 
 #include <fstream>
 #include <iostream>
 #include <string>
 
-#include "ExampleIOGroup.hpp"
-#include "IOGroup.hpp"
-#include "PlatformTopo.hpp"
-#include "Exception.hpp"
+#include "geopm/IOGroup.hpp"
+#include "geopm/PlatformTopo.hpp"
+#include "geopm/Exception.hpp"
+#include "geopm/Agg.hpp"
 
 using geopm::Exception;
-using geopm::IPlatformTopo;
+using geopm::PlatformTopo;
 
 // Registers this IOGroup with the IOGroup factory, making it visible
 // to PlatformIO when the plugin is first loaded.
@@ -112,9 +114,9 @@ bool ExampleIOGroup::is_valid_control(const std::string &control_name) const
 // Return board domain for all valid signals
 int ExampleIOGroup::signal_domain_type(const std::string &signal_name) const
 {
-    int result = IPlatformTopo::M_DOMAIN_INVALID;
+    int result = GEOPM_DOMAIN_INVALID;
     if (is_valid_signal(signal_name)) {
-        result = IPlatformTopo::M_DOMAIN_BOARD;
+        result = GEOPM_DOMAIN_BOARD;
     }
     return result;
 }
@@ -122,9 +124,9 @@ int ExampleIOGroup::signal_domain_type(const std::string &signal_name) const
 // Return board domain for all valid controls
 int ExampleIOGroup::control_domain_type(const std::string &control_name) const
 {
-    int result = IPlatformTopo::M_DOMAIN_INVALID;
+    int result = GEOPM_DOMAIN_INVALID;
     if (is_valid_control(control_name)) {
-        result = IPlatformTopo::M_DOMAIN_BOARD;
+        result = GEOPM_DOMAIN_BOARD;
     }
     return result;
 }
@@ -137,11 +139,11 @@ int ExampleIOGroup::push_signal(const std::string &signal_name, int domain_type,
                         " not valid for ExampleIOGroup.",
                         GEOPM_ERROR_INVALID, __FILE__, __LINE__);
     }
-    if (domain_type != IPlatformTopo::M_DOMAIN_BOARD) {
+    if (domain_type != GEOPM_DOMAIN_BOARD) {
         throw Exception("ExampleIOGroup::push_signal(): domain_type must be M_DOMAIN_BOARD.",
                         GEOPM_ERROR_INVALID, __FILE__, __LINE__);
     }
-    if (domain_idx < 0 || domain_idx >= m_platform_topo.num_domain(IPlatformTopo::M_DOMAIN_BOARD)) {
+    if (domain_idx < 0 || domain_idx >= m_platform_topo.num_domain(GEOPM_DOMAIN_BOARD)) {
         throw Exception("ExampleIOGroup::push_signal(): domain_idx out of range.",
                         GEOPM_ERROR_INVALID, __FILE__, __LINE__);
     }
@@ -163,11 +165,11 @@ int ExampleIOGroup::push_control(const std::string &control_name, int domain_typ
                         " not valid for ExampleIOGroup",
                         GEOPM_ERROR_INVALID, __FILE__, __LINE__);
     }
-    if (domain_type != IPlatformTopo::M_DOMAIN_BOARD) {
+    if (domain_type != GEOPM_DOMAIN_BOARD) {
         throw Exception("ExampleIOGroup::push_control(): domain_type must be M_DOMAIN_BOARD.",
                         GEOPM_ERROR_INVALID, __FILE__, __LINE__);
     }
-    if (domain_idx < 0 || domain_idx >= m_platform_topo.num_domain(IPlatformTopo::M_DOMAIN_BOARD)) {
+    if (domain_idx < 0 || domain_idx >= m_platform_topo.num_domain(GEOPM_DOMAIN_BOARD)) {
         throw Exception("ExampleIOGroup::push_control(): domain_idx out of range.",
                         GEOPM_ERROR_INVALID, __FILE__, __LINE__);
     }
@@ -286,11 +288,11 @@ double ExampleIOGroup::read_signal(const std::string &signal_name, int domain_ty
                         "not valid for ExampleIOGroup",
                         GEOPM_ERROR_INVALID, __FILE__, __LINE__);
     }
-    if (domain_type != IPlatformTopo::M_DOMAIN_BOARD) {
+    if (domain_type != GEOPM_DOMAIN_BOARD) {
         throw Exception("ExampleIOGroup::push_signal(): domain_type must be M_DOMAIN_BOARD.",
                         GEOPM_ERROR_INVALID, __FILE__, __LINE__);
     }
-    if (domain_idx < 0 || domain_idx >= m_platform_topo.num_domain(IPlatformTopo::M_DOMAIN_BOARD)) {
+    if (domain_idx < 0 || domain_idx >= m_platform_topo.num_domain(GEOPM_DOMAIN_BOARD)) {
         throw Exception("ExampleIOGroup::push_signal(): domain_idx out of range.",
                         GEOPM_ERROR_INVALID, __FILE__, __LINE__);
     }
@@ -329,11 +331,11 @@ void ExampleIOGroup::write_control(const std::string &control_name, int domain_t
                         "not valid for ExampleIOGroup",
                         GEOPM_ERROR_INVALID, __FILE__, __LINE__);
     }
-    if (domain_type != IPlatformTopo::M_DOMAIN_BOARD) {
+    if (domain_type != GEOPM_DOMAIN_BOARD) {
         throw Exception("ExampleIOGroup::push_control(): domain_type must be M_DOMAIN_BOARD.",
                         GEOPM_ERROR_INVALID, __FILE__, __LINE__);
     }
-    if (domain_idx < 0 || domain_idx >= m_platform_topo.num_domain(IPlatformTopo::M_DOMAIN_BOARD)) {
+    if (domain_idx < 0 || domain_idx >= m_platform_topo.num_domain(GEOPM_DOMAIN_BOARD)) {
         throw Exception("ExampleIOGroup::push_control(): domain_idx out of range.",
                         GEOPM_ERROR_INVALID, __FILE__, __LINE__);
     }
@@ -367,6 +369,71 @@ void ExampleIOGroup::save_control(void)
 void ExampleIOGroup::restore_control(void)
 {
 
+}
+
+// Hint to Agent about how to aggregate signals from this IOGroup
+std::function<double(const std::vector<double> &)> ExampleIOGroup::agg_function(const std::string &signal_name) const
+{
+    if (!is_valid_signal(signal_name)) {
+        throw Exception("ExampleIOGroup:agg_function(): " + signal_name +
+                        "not valid for ExampleIOGroup",
+                        GEOPM_ERROR_INVALID, __FILE__, __LINE__);
+    }
+    // All signals will be aggregated as an average
+    return geopm::Agg::average;
+}
+
+// A user-friendly description of each signal
+std::string ExampleIOGroup::signal_description(const std::string &signal_name) const
+{
+    if (!is_valid_signal(signal_name)) {
+        throw Exception("ExampleIOGroup::signal_description(): signal_name " + signal_name +
+                        " not valid for ExampleIOGroup.",
+                        GEOPM_ERROR_INVALID, __FILE__, __LINE__);
+    }
+    int signal_idx = m_signal_idx_map.at(signal_name);
+    std::string result = "";
+    switch (signal_idx) {
+        case M_SIGNAL_USER_TIME:
+            result = "CPU time spent in user mode";
+            break;
+        case M_SIGNAL_NICE_TIME:
+            result = "CPU time spend in user mode with low priority";
+            break;
+        case M_SIGNAL_SYSTEM_TIME:
+            result = "CPU time spent in system mode";
+            break;
+        case M_SIGNAL_IDLE_TIME:
+            result = "CPU idle time";
+            break;
+        default:
+            break;
+    }
+    return result;
+}
+
+// A user-friendly description of each control
+std::string ExampleIOGroup::control_description(const std::string &control_name) const
+{
+    if (!is_valid_control(control_name)) {
+        throw Exception("ExampleIOGroup::control_description(): " + control_name +
+                        "not valid for ExampleIOGroup",
+                        GEOPM_ERROR_INVALID, __FILE__, __LINE__);
+    }
+
+    std::string result = "";
+    int control_idx = m_control_idx_map.at(control_name);
+    switch (control_idx) {
+        case M_CONTROL_STDOUT:
+            result = "Writes a floating point value to standard output";
+            break;
+        case M_CONTROL_STDERR:
+            result = "Writes a floating point value to standard error";
+            break;
+        default:
+            break;
+    }
+    return result;
 }
 
 // Name used for registration with the IOGroup factory

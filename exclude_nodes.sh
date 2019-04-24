@@ -20,7 +20,7 @@ else
     NUM_BAD_NODES=$(echo $BAD_NODES | sed 's|[^,]||g' | wc -c)
 fi
 
-if [ $NUM_REQUIRED_NODES -ge $(($COBALT_JOBSIZE - $NUM_BAD_NODES)) ]; then
+if [ $NUM_REQUIRED_NODES -gt $(($COBALT_JOBSIZE - $NUM_BAD_NODES)) ]; then
     >&2 echo "Error: number of msr-safe enabled nodes is less than number of nodes required!"
     >&2 echo "Warning: msr-safe failure detected on the following nodes: $BAD_NODES"
     exit 1
