@@ -17,24 +17,14 @@ there and the scripts have been modified to use the cobalt resource
 manager.  Each step in the tutorial is documented below in this
 README.
 
-A video demonstration of these tutorials is available online here:
-
-https://www.youtube.com/playlist?list=PLwm-z8c2AbIBU-T7HnMi_Pux7iO3gQQnz
-
-These videos do not reflect changes that have happened to GEOPM since
-September 2016 when they were recorded.  In particular, the videos
-do not use the geopmpy.launcher launch wrapper, which was introduced
-prior to the v0.3.0 alpha release.  The tutorial scripts have been
-updated to use the launcher, but the videos have not.
-
 Building the tutorials
 ----------------------
 There is a build script called tutorial_build_theta.sh that will
 compile the tutorials with the Makefile using the Theta environment.
 
 
-Step 0: Profiling and Tracing an Unmodified Application
--------------------------------------------------------
+0. Profiling and Tracing an Unmodified Application
+--------------------------------------------------
 The first thing an HPC application user will want to do when
 integrating their application with the GEOPM runtime is to analyze
 performance of the application without modifying its source code.
@@ -83,8 +73,8 @@ The report file will contain information about time and energy spent
 in MPI regions and outside of MPI regions as well as the average CPU
 frequency.
 
-Step 1: A slightly more realistic application
----------------------------------------------
+1. A slightly more realistic application
+----------------------------------------
 Tutorial 1 shows a slightly more realistic application.  This
 application implements a loop that does a number of different types of
 operations.  In addition to sleeping, the loop does a memory-intensive
@@ -94,15 +84,15 @@ operation.  In this example we are again using GEOPM without including
 any GEOPM APIs in the application and using LD_PRELOAD to interpose
 GEOPM on MPI.
 
-Step 2: Adding GEOPM mark up to the application
------------------------------------------------
+2. Adding GEOPM mark up to the application
+------------------------------------------
 Tutorial 2 takes the application used in tutorial 1 and modifies it
 with the GEOPM profiling markup.  This enables the report and trace to
 contain region specific information.
 
-Step 3: Adding work imbalance to the application
-------------------------------------------------
-Tutorial 3 modifies tutorial 2 removing all but the compute intensive
+3. Adding work imbalance to the application
+-------------------------------------------
+Tutorial 3 modifies tutorial 2 removing all but the compute-intensive
 region from the application and then adding work imbalance across the
 MPI ranks.  This tutorial also uses a modified implementation of the
 DGEMM region which does set up and shutdown once per application run
@@ -117,21 +107,19 @@ formatted policy file.  This control is intended to synchronize the
 run time of each rank to overcome this load imbalance.  The tutorial 3
 script executes the application with two different policies.  The
 first run enforces a uniform power budget of 150 Watts to each compute
-node using the governing decider alone, and the second run enforces an
+node using the governing agent alone, and the second run enforces an
 average power budget of 150 Watts across all compute nodes while
 diverting power to the nodes which have more work to do using the
-balancing decider at the tree levels of the hierarchy and the
-governing decider at the leaf.
+governing agent.
 
-
-Step 4: Adding artificial imbalance to the application
-------------------------------------------------------
+4. Adding artificial imbalance to the application
+-------------------------------------------------
 Tutorial 4 enables artificial injection of imbalance.  This differs
 from from tutorial by 3 having the application sleep for a period of
 time proportional to the amount of work done rather than simply
 increasing the amount of work done.  This type of modeling is useful
 when the amount of work within cannot be easily scaled.  The imbalance
-is controlled by a file whose path is given by the IMBALANCER_CONFIG
+is controlled by a file who's path is given by the IMBALANCER_CONFIG
 environment variable.  This file gives a list of hostnames and
 imbalance injection fraction.  An example file might be:
 
@@ -147,8 +135,8 @@ tutorial_4.cobalt script will create a configuration file called
 nodes will have a 10% injection of imbalance.  The node is chosen
 arbitrarily by a race if the configuration file is not present.
 
-Step 5: Using the progress interface
-------------------------------------
+5. Using the progress interface
+-------------------------------
 A computational application may make use of the geopm_prof_progress()
 or the geopm_tprof_post() interfaces to report fractional progress
 through a region to the controller.  These interfaces are documented
@@ -159,77 +147,32 @@ time.  Note that the unmodified tutorial build scripts do enable
 OpenMP, so the geopm_tprof* interfaces will be used by default.  The
 progress values recorded can be seen in the trace output.
 
-Step 6: The model application
------------------------------
-Tutorial 6 is the first tutorial written in C++.  The regions defined
-in the previous examples (with the exception of the sleep region) have
-non-trivial amounts of time dedicated to start-up and shutdown
-operations in each call to execute the region.  These include memory
-allocation, value initialization and memory deallocation.  In tutorial
-6 we move these start-up and shutdown operations into the beginning
-and end of the application so that the execution of a region is
-dedicated entirely to a compute-intensive (DGEMM), memory-intensive
-(stream) or network-intensive (all2all) operation.  The ModelRegion
-and ModelApplication will form the basis for the GEOPM integration
-tests.
+6. The model application
+------------------------
+Tutoral 6 uses the geopmbench tool and configures it with the json
+input file.  The geopmbench application is documented in the
+geopmbench(1) man page and can be use to to a wide range of
+experiments with GEOPM.  Note that geopmbench is used in most
+of the GEOPM integration tests.
 
-The tutorial_6 application is the first to accept command line
-parameters.  The tutorial_6 --help output:
+7. Agent and IOGroup extension
+------------------------------
+See agent and iogroup sub-directories and their enclosed README.md
+files for information about how to extend the GEOPM runtime through
+the development of plugins.
 
-    ./tutorial_6 -h | --help
-        Print this help message.
+8. YouTube videos
+-----------------
+A video demonstration of these tutorials is available online here:
 
-    ./tutorial_6 [--verbose] [config_file]
+https://www.youtube.com/playlist?list=PLwm-z8c2AbIBU-T7HnMi_Pux7iO3gQQnz
 
-        --verbose: Print output from rank zero as every region executes.
+These videos do not reflect changes that have happened to GEOPM since
+September 2016 when they were recorded.  In particular, the videos do
+not use the geopmpy.launcher launch wrapper which was introduced prior
+to the v0.3.0 alpha release.  The tutorial scripts have been updated
+to use the launcher, but the videos have not.  These videos also use
+the Decider/Platform/PlatformImp code path which are deprecated and
+will be removed in the 1.0 release in favor of the
+Agent/PlatformIO/IOGroup class relationship.
 
-        config_file: Path to json file containing loop count and sequence
-                     of regions in each loop.
-
-                     Example configuration json string:
-
-                     {"loop-count": 10,
-                      "region": ["sleep", "stream", "dgemm", "stream", "all2all"],
-                      "big-o": [1.0, 1.0, 1.0, 1.0, 1.0]}
-
-                     The "loop-count" value is an integer that sets the
-                     number of loops executed.  Each time through the loop
-                     the regions listed in the "region" array are
-                     executed.  The "big-o" array gives double precision
-                     values for each region.  Region names can be one of
-                     the following options:
-
-                     sleep: Executes clock_nanosleep() for big-o seconds.
-
-                     spin: Executes a spin loop for big-o seconds.
-
-                     stream: Executes stream "triadd" on a vector with
-                     length proportional to big-o.
-
-                     dgemm: Dense matrix-matrix multiply with floating
-                     point operations proportional to big-o.
-
-                     all2all: All processes send buffers to all other
-                     processes.  The time of this operation is
-                     proportional to big-o.
-
-                     Example configuration json string with imbalance:
-
-                     {"loop-count": 10,
-                      "region": ["sleep", "stream", "dgemm-imbalance", "stream", "all2all"],
-                      "big-o": [1.0, 1.0, 1.0, 1.0, 1.0],
-                      "hostname": ["compute-node-3", "compute-node-15"],
-                      "imbalance": [0.05, 0.15]}
-
-                     If "-imbalance" is appended to any region name in
-                     the configuration file and the "hostname" and
-                     "imbalance" fields are provided then those
-                     regions will have an injected delay on the hosts
-                     listed.  In the above example a 5% delay on
-                     "my-compute-node-3" and a 15% delay on
-                     "my-compute-node-15" are injected when executing
-                     the dgemm region.
-
-                     If "-progress" is appended to any region name in the
-                     configuration, then progress for the region will be
-                     reported through the geopm_prof_progress API.

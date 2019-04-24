@@ -25,22 +25,24 @@ geopmagent --agent=power_balancer \
 export OMP_NUM_THREADS=15
 
 # Use GEOPM launcher wrapper script with ALPS's aprun
-geopmaprun -N 4 \
-           -n 8 \
-           -r 3 \
-           --geopm-ctl=process \
-           --geopm-report=tutorial_3_governed_report \
-           --geopm-trace=tutorial_3_governed_trace \
-           --geopm-agent=power_governor \
-           --geopm-policy=tutorial_governed_policy.json \
-           -- ./tutorial_3 \
+geopmlaunch aprun \
+            -N 4 \
+            -n 8 \
+            -r 3 \
+            --geopm-ctl=process \
+            --geopm-report=tutorial_3_governed_report \
+            --geopm-trace=tutorial_3_governed_trace \
+            --geopm-agent=power_governor \
+            --geopm-policy=tutorial_governed_policy.json \
+            -- ./tutorial_3 \
 && \
-geopmaprun -N 4 \
-           -n 8 \
-           -r 3 \
-           --geopm-ctl=process \
-           --geopm-report=tutorial_3_balanced_report \
-           --geopm-trace=tutorial_3_balanced_trace \
-           --geopm-agent=power_balancer \
-           --geopm-policy=tutorial_balanced_policy.json \
-           -- ./tutorial_3
+geopmlaunch aprun \
+            -N 4 \
+            -n 8 \
+            -r 3 \
+            --geopm-ctl=process \
+            --geopm-report=tutorial_3_balanced_report \
+            --geopm-trace=tutorial_3_balanced_trace \
+            --geopm-agent=power_balancer \
+            --geopm-policy=tutorial_balanced_policy.json \
+            -- ./tutorial_3
