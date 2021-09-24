@@ -47,6 +47,8 @@ specifying the --geopm-preload option:
     #COBALT --jobname geopm_quickstart
     #COBALT --env JOBID=$jobid
 
+    module unload darshan
+    module load intel
     module load geopm
 
     # Use GEOPM launcher wrapper script with ALPS's aprun

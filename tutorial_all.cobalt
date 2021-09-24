@@ -6,6 +6,8 @@
 #COBALT --jobname geopm_tutorial_all
 #COBALT --env JOBID=$jobid
 
+module unload darshan
+module load intel
 module load geopm
 
 REQUIRED_NODES=256

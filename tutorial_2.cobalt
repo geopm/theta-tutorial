@@ -6,6 +6,8 @@
 #COBALT --jobname geopm_tutorial_2
 #COBALT --env JOBID=$jobid
 
+module unload darshan
+module load intel
 module load geopm
 
 # Run on 2 nodes
